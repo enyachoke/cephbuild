@@ -1,0 +1,41 @@
+FROM rockylinux:8
+
+LABEL maintainer="Marc Singer <marc@singer.services>"
+
+ARG CEPH_VERSION=16.2.14
+
+ENV CEPH_SRC_DIR=/src
+ENV CEPH_BUILD_DIR=/build
+ENV CEPH_HOOKS_DIR=/hooks
+ENV CEPH_VERSION=${CEPH_VERSION}
+
+# Ensure that the dependency installation script works with Rocky Linux
+RUN sed -i 's/ID="rocky/ID="centos/g' /etc/os-release
+
+# Install build tools
+RUN dnf -y install \
+    wget \
+    rpm-build \
+    rpmdevtools \
+    jq \
+    && dnf clean all
+
+# Download ceph source code
+WORKDIR ${CEPH_SRC_DIR}
+RUN wget https://eu.ceph.com/tarballs/ceph-${CEPH_VERSION}.tar.gz
+
+# Install ceph build dependencies
+RUN tar -C ${CEPH_SRC_DIR} -xzf ceph-${CEPH_VERSION}.tar.gz "ceph-${CEPH_VERSION}/install-deps.sh" "ceph-${CEPH_VERSION}/ceph.spec*" \
+    && cd ceph-${CEPH_VERSION} \
+    && ./install-deps.sh
+
+RUN dnf -y install \
+    ninja-build \
+    && dnf clean all
+
+COPY --chown=root:root docker-build.sh /usr/local/bin/docker-build.sh
+COPY --chown=root:root hooks/ ${CEPH_HOOKS_DIR}/
+
+WORKDIR ${CEPH_BUILD_DIR}
+
+ENTRYPOINT [ "/usr/local/bin/docker-build.sh" ]
