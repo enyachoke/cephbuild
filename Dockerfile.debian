@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM ubuntu:20.04
 
 ### Builds Ceph from source code
 ### Usage:
@@ -27,12 +27,12 @@ WORKDIR ${CEPH_SRC_DIR}
 RUN wget https://eu.ceph.com/tarballs/ceph-${CEPH_VERSION}.tar.gz
 
 # Install ceph build dependencies
-RUN tar -C ${CEPH_SRC_DIR} -xzf ceph-${CEPH_VERSION}.tar.gz "ceph-${CEPH_VERSION}/install-deps.sh" "ceph-${CEPH_VERSION}/ceph.spec*" \
+RUN tar -C ${CEPH_SRC_DIR} -xzf ceph-${CEPH_VERSION}.tar.gz\
     && cd ceph-${CEPH_VERSION} \
     && ./install-deps.sh
 
 COPY --chown=root:root docker-build.sh /usr/local/bin/docker-build.sh
-COPY --chown=root:root hooks/ ${CEPH_HOOKS_DIR}/
+COPY --chown=root:root build-hooks/ ${CEPH_HOOKS_DIR}/
 
 WORKDIR ${CEPH_BUILD_DIR}
 

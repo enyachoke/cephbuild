@@ -12,7 +12,7 @@ No longer do you need to setup a VM and or complex build system to compile Ceph.
 
 ### Debian 12 (Bookworm)
 
-``` docker build -t ceph-16-build-debian --build-arg CEPH_VERSION=16.2.14 -f Dockerfile.debian ```
+``` docker buildx build  --load -t ceph-19-build-debian --build-arg CEPH_VERSION=19.2.0 -f Dockerfile.debian . ```
 
 ## Build Ceph
 

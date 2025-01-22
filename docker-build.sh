@@ -6,8 +6,8 @@ set -e  # exit on error
 
 echo "Extracting the Ceph ${CEPH_VERSION} source code to build directory ${CEPH_BUILD_DIR}..."
 tar -C "${CEPH_BUILD_DIR}" -xzf "${CEPH_SRC_DIR}/ceph-${CEPH_VERSION}.tar.gz"
-mv "${CEPH_BUILD_DIR}/ceph-${CEPH_VERSION} ${CEPH_BUILD_DIR}/ceph"
-cd "${CEPH_BUILD_DIR}/ceph"
+mkdir -p "${CEPH_BUILD_DIR}"
+cd "${CEPH_BUILD_DIR}/ceph-${CEPH_VERSION}/"
 
 echo "Running hooks..."
 for hook in ${CEPH_HOOKS_DIR}/*.sh; do
@@ -24,12 +24,6 @@ else
     ./do_cmake.sh
 fi
 
-if [ -f "${CEPH_BUILD_DIR}/ceph/build/Makefile" ]; then
-    echo "Completing build with Make (Ceph <17)..."
-    cd build
-    make -j$(nproc)
-else
-    echo "Completing build with Ninja (Ceph 17+)..."
-    cd build
-    ninja
-fi
+echo "Completing build with Ninja (Ceph 17+)..."
+cd build
+ninja
